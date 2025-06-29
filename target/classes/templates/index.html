@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>BookShop - Home</title>
+    <link rel="stylesheet" th:href="@{/css/book-table.css}">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .nav-links a {
+            margin-left: 10px;
+            text-decoration: none;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 25px;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        form {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>BookStore</h1>
+    <div class="nav-links">
+        <span th:if="${session.customer == null}">
+            <a th:href="@{/login}">Login</a> |
+            <a th:href="@{/register}">Register</a>
+        </span>
+        <span th:if="${session.customer != null}">
+            Welcome, <strong th:text="${session.customer.firstName}">User</strong> |
+            <a th:href="@{/cart}">Cart</a> |
+            <a th:href="@{/logout}">Logout</a>
+            <!-- Show Manage Store only if role is ADMIN -->
+            <span th:if="${session.customer.role != null and session.customer.role.name() == 'ADMIN'}">
+                | <a th:href="@{/admin-panel}">Manage Store</a>
+            </span>
+        </span>
+    </div>
+</header>
+
+
+<h2>Available Books</h2>
+
+<div class="table-container">
+    <table>
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Author</th>
+            <th>ISBN</th>
+            <th>Year</th>
+            <th>Price</th>
+            <th>Copies</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="book : ${books}">
+            <td th:text="${book.title}">Title</td>
+            <td th:text="${book.author}">Author</td>
+            <td th:text="${book.isbn}">ISBN</td>
+            <td th:text="${book.year}">Year</td>
+            <td th:text="${book.price}" class="price">$0.00</td>
+            <td th:text="${book.copiesAvailable}">0</td>
+            <td>
+                <form th:action="@{'/cart/add/' + ${book.id}}" method="post">
+                    <button type="submit" th:disabled="${book.copiesAvailable == 0}">
+                        Add to Cart
+                    </button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+
+</body>
+</html>

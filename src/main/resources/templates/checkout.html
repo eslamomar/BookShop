@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Checkout</title>
+</head>
+<body>
+
+<h2>Checkout</h2>
+
+<p>Total: <b th:text="${total}">$0.00</b></p>
+
+<form th:action="@{/cart/checkout}" method="post">
+    <label>Card Number: <input type="text" name="cardNumber" required></label><br>
+    <label>Expiry Date: <input type="text" name="expiry" placeholder="MM/YY" required></label><br>
+    <label>CVV: <input type="text" name="cvv" required></label><br>
+    <button type="submit">Pay</button>
+</form>
+
+<div th:if="${error}">
+    <p th:text="${error}" style="color:red;"></p>
+</div>
+
+</body>
+</html>

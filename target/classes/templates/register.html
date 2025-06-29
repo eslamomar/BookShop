@@ -1,0 +1,11 @@
+<form method="post" th:action="@{/register}" th:object="${customer}">
+    <h2>Register</h2>
+    <input th:field="*{email}" placeholder="Email" required />
+    <input th:field="*{password}" placeholder="Password" required type="password"/>
+    <input th:field="*{firstName}" placeholder="First name" required />
+    <input th:field="*{lastName}" placeholder="Last name" required />
+    <input type="date" th:field="*{dateOfBirth}" required />
+    <input th:field="*{address}" placeholder="Address" required />
+    <input th:field="*{phoneNumber}" placeholder="Phone" required />
+    <button type="submit">Register</button>
+</form>

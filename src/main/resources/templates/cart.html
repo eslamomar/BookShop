@@ -1,0 +1,37 @@
+<!-- cart.html -->
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Your Cart</title>
+</head>
+<body>
+
+<h2>Your Cart</h2>
+<table>
+    <thead>
+    <tr>
+        <th>Book</th><th>Price</th><th>Qty</th><th>Subtotal</th><th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="item : ${cartItems}">
+        <td th:text="${item.book.title}">Title</td>
+        <td th:text="${item.book.price}">$0.00</td>
+        <td th:text="${item.quantity}">1</td>
+        <td th:text="${item.book.price * item.quantity}">$0.00</td>
+        <td><a th:href="@{'/cart/remove/' + ${item.id}}">Remove</a></td>
+    </tr>
+    </tbody>
+</table>
+
+<p>Total: <b th:text="${total}">$0.00</b></p>
+
+<!-- Corrected the form action -->
+<form th:action="@{/cart/checkout}" method="get">
+    <button type="submit">Proceed to Checkout</button>
+</form>
+
+<a th:href="@{/}">Back to Books</a>
+
+</body>
+</html>

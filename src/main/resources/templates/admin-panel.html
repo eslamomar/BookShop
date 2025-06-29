@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Admin Control Panel</title>
+    <link rel="stylesheet" th:href="@{/css/admin-panel.css}">
+</head>
+<body>
+
+<div class="admin-container">
+    <aside class="sidebar">
+        <h2>Admin Panel</h2>
+        <nav>
+            <ul>
+                <li><a href="/">View Store</a></li>
+                <li><a href="/admin/books">Manage Books</a></li>
+            </ul>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+        <div class="header">
+            <h1>Book Management</h1>
+            <a href="/books/add" class="btn-add">+ Add New Book</a>
+        </div>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Title</th>
+                <th>Author</th>
+                <th>ISBN</th>
+                <th>Year</th>
+                <th>Price</th>
+                <th>Copies</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="book : ${books}">
+                <td th:text="${book.title}">Title</td>
+                <td th:text="${book.author}">Author</td>
+                <td th:text="${book.isbn}">ISBN</td>
+                <td th:text="${book.year}">Year</td>
+                <td th:text="${book.price}">$0.00</td>
+                <td th:text="${book.copiesAvailable}">0</td>
+                <td>
+                    <a th:href="@{'/books/edit/' + ${book.id}}" class="btn-edit">Edit</a>
+                    <a th:href="@{'/books/delete/' + ${book.id}}" class="btn-delete" onclick="return confirm('Delete this book?')">Delete</a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </main>
+</div>
+
+</body>
+</html>

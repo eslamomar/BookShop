@@ -1,0 +1,11 @@
+<div>
+    <a href="/">Home</a>
+    <a href="/cart">Cart</a>
+    <span th:if="${session.customer == null}">
+      <a href="/login">Login</a>
+  </span>
+    <span th:if="${session.customer != null}">
+      Hello <b th:text="${session.customer.username}"></b> |
+      <a href="/logout">Logout</a>
+  </span>
+</div>
