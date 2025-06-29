@@ -1,44 +1,39 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title th:text="${book.id == null} ? 'Add Book' : 'Edit Book'">Book Form</title>
-    <link rel="stylesheet" th:href="@{/css/admin-panel.css}">
+    <title>Add/Edit Book</title>
+    <link rel="stylesheet" th:href="@{/css/book-form.css}">
 </head>
 <body>
+<h1 th:text="${book.id == null ? 'Add New Book' : 'Edit Book'}"></h1>
 
-<div class="form-container">
-    <h1 th:text="${book.id == null} ? 'Add New Book' : 'Edit Book'"></h1>
+<form th:action="@{/books/save}" th:object="${book}" method="post">
+    <input type="hidden" th:field="*{id}"/>
 
-    <form action="#" th:action="@{/books/save}" th:object="${book}" method="post">
+    <label>Title:</label>
+    <input type="text" th:field="*{title}" required/><br/>
 
-        <input type="hidden" th:field="*{id}" />
+    <label>ISBN:</label>
+    <input type="text" th:field="*{isbn}" required/><br/>
 
-        <label>Title:</label>
-        <input type="text" th:field="*{title}" required />
+    <label>Year:</label>
+    <input type="number" th:field="*{year}" required/><br/>
 
-        <label>Author:</label>
-        <input type="text" th:field="*{author}" required />
+    <label>Price:</label>
+    <input type="number" step="0.01" th:field="*{price}" required/><br/>
 
-        <label>ISBN:</label>
-        <input type="text" th:field="*{isbn}" required />
+    <label>Copies Available:</label>
+    <input type="number" th:field="*{copiesAvailable}" required/><br/>
 
-        <label>Year:</label>
-        <input type="number" th:field="*{year}" required />
+    <!-- MULTIPLE AUTHORS -->
+    <label>Authors (comma-separated):</label>
+    <input type="text" name="authorsInput" th:value="${authorsInput}" required/>
 
-        <label>Price:</label>
-        <input type="number" step="0.01" th:field="*{price}" required />
 
-        <label>Copies Available:</label>
-        <input type="number" th:field="*{copiesAvailable}" required />
+    <button type="submit">Save</button>
+</form>
 
-        <div class="form-actions">
-            <button type="submit">Save</button>
-            <a href="/admin/books">Cancel</a>
-        </div>
-
-        <p th:if="${error}" th:text="${error}" style="color:red;"></p>
-    </form>
-</div>
+<p th:if="${error}" th:text="${error}" style="color:red;"></p>
 
 </body>
 </html>

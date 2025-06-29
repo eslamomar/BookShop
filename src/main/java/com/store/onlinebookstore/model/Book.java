@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "books", uniqueConstraints = {
@@ -20,8 +22,15 @@ public class Book {
 
     @NotBlank
     private String title;
-    @NotBlank
-    private String author;
+
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+            name = "book_author",
+            joinColumns = @JoinColumn(name = "book_id"),
+            inverseJoinColumns = @JoinColumn(name = "author_id")
+    )
+    private List<Author> authors = new ArrayList<>();
+
     @NotBlank
     private int year;
     @NotBlank
@@ -55,13 +64,6 @@ public class Book {
         this.isbn = isbn;
     }
 
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
 
     public int getYear() {
         return year;
@@ -85,5 +87,14 @@ public class Book {
 
     public void setCopiesAvailable(int copiesAvailable) {
         this.copiesAvailable = copiesAvailable;
+    }
+
+    // Add these methods:
+    public List<Author> getAuthors() {
+        return authors;
+    }
+
+    public void setAuthors(List<Author> authors) {
+        this.authors = authors;
     }
 }
