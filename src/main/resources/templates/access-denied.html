@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Access Denied</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 50px;
+      text-align: center;
+    }
+    .error-container {
+      max-width: 500px;
+      margin: 0 auto;
+      padding: 30px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #f9f9f9;
+    }
+    .error-title {
+      color: #d32f2f;
+      font-size: 24px;
+      margin-bottom: 20px;
+    }
+    .error-message {
+      font-size: 16px;
+      margin-bottom: 20px;
+      color: #666;
+    }
+    .back-link {
+      color: #1976d2;
+      text-decoration: none;
+      font-weight: bold;
+    }
+    .back-link:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+<div class="error-container">
+  <h1 class="error-title">Access Denied</h1>
+  <p class="error-message">
+    You do not have permission to access this resource.
+    Please contact your administrator if you believe this is an error.
+  </p>
+  <a th:href="@{/}" class="back-link">Return to Home</a>
+</div>
+</body>
+</html>

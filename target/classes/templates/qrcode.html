@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Setup Two-Factor Authentication</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            text-align: center;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        img {
+            margin: 20px 0;
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        .instructions {
+            text-align: left;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>Two-Factor Authentication Setup</h2>
+
+    <div class="instructions">
+        <h3>Instructions:</h3>
+        <ol>
+            <li>Install Google Authenticator on your phone</li>
+            <li>Open the app and tap the + button</li>
+            <li>Select "Scan QR Code"</li>
+            <li>Scan the QR code below</li>
+            <li>The app will show a 6-digit code that changes every 30 seconds</li>
+            <li>You'll need this code each time you log in</li>
+        </ol>
+    </div>
+
+    <h3>Scan this QR Code:</h3>
+    <img th:src="${qr}" alt="QR Code for 2FA" />
+
+    <p><strong>Important:</strong> Save this QR code or write down your secret key. You'll need it if you lose access to your phone.</p>
+
+    <a href="/login" class="btn">Continue to Login</a>
+</div>
+</body>
+</html>

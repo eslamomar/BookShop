@@ -1,11 +1,239 @@
-<form method="post" th:action="@{/register}" th:object="${customer}">
-    <h2>Register</h2>
-    <input th:field="*{email}" placeholder="Email" required />
-    <input th:field="*{password}" placeholder="Password" required type="password"/>
-    <input th:field="*{firstName}" placeholder="First name" required />
-    <input th:field="*{lastName}" placeholder="Last name" required />
-    <input type="date" th:field="*{dateOfBirth}" required />
-    <input th:field="*{address}" placeholder="Address" required />
-    <input th:field="*{phoneNumber}" placeholder="Phone" required />
-    <button type="submit">Register</button>
-</form>
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Register</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        form { max-width: 100%; }
+        input, button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .checkbox-container {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+        }
+        .checkbox-container input {
+            width: auto;
+            margin-right: 10px;
+        }
+        .error {
+            color: #e74c3c;
+            background: #ffeaea;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        .password-requirements {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        .requirement {
+            display: block;
+            margin: 2px 0;
+        }
+        .requirement.valid {
+            color: #27ae60;
+        }
+        .requirement.invalid {
+            color: #e74c3c;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        button:disabled {
+            background: #bdc3c7;
+            cursor: not-allowed;
+        }
+        .field-error {
+            color: #e74c3c;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <form method="post" th:action="@{/register/save}" th:object="${customer}" id="registrationForm">
+        <h2>Register</h2>
+
+        <div th:if="${#fields.hasErrors('*')}" class="error">
+            <p th:each="err : ${#fields.errors('*')}" th:text="${err}"></p>
+        </div>
+
+        <input th:field="*{email}" placeholder="Email" required type="email" />
+        <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+
+        <input th:field="*{password}" placeholder="Password" required type="password" id="password"/>
+        <div class="field-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></div>
+        <div class="password-requirements">
+            <span class="requirement" id="length">✗ At least 8 characters</span>
+            <span class="requirement" id="uppercase">✗ One uppercase letter</span>
+            <span class="requirement" id="lowercase">✗ One lowercase letter</span>
+            <span class="requirement" id="digit">✗ One number</span>
+            <span class="requirement" id="special">✗ One special character (@$!%*?&)</span>
+        </div>
+
+        <input type="password" placeholder="Confirm Password" required id="confirmPassword"/>
+        <div class="field-error" id="passwordMatchError"></div>
+
+        <input th:field="*{firstName}" placeholder="First name" required />
+        <div class="field-error" th:if="${#fields.hasErrors('firstName')}" th:errors="*{firstName}"></div>
+
+        <input th:field="*{lastName}" placeholder="Last name" required />
+        <div class="field-error" th:if="${#fields.hasErrors('lastName')}" th:errors="*{lastName}"></div>
+
+        <input type="date" th:field="*{dateOfBirth}" required />
+        <div class="field-error" th:if="${#fields.hasErrors('dateOfBirth')}" th:errors="*{dateOfBirth}"></div>
+
+        <input th:field="*{address}" placeholder="Address" required />
+        <div class="field-error" th:if="${#fields.hasErrors('address')}" th:errors="*{address}"></div>
+
+        <input th:field="*{phoneNumber}" placeholder="Phone" required />
+        <div class="field-error" th:if="${#fields.hasErrors('phoneNumber')}" th:errors="*{phoneNumber}"></div>
+
+        <div class="checkbox-container">
+            <input type="checkbox" th:field="*{using2FA}" id="using2FA"/>
+            <label for="using2FA">Enable Two-Factor Authentication</label>
+        </div>
+
+        <button type="submit" id="submitBtn">Register</button>
+        <p>Already have an account? <a href="/login">Login</a></p>
+    </form>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const submitBtn = document.getElementById('submitBtn');
+
+        // Password requirement elements
+        const lengthReq = document.getElementById('length');
+        const uppercaseReq = document.getElementById('uppercase');
+        const lowercaseReq = document.getElementById('lowercase');
+        const digitReq = document.getElementById('digit');
+        const specialReq = document.getElementById('special');
+        const passwordMatchError = document.getElementById('passwordMatchError');
+
+        function validatePassword() {
+            const password = passwordInput.value;
+            let isValid = true;
+
+            // Length check
+            if (password.length >= 8) {
+                lengthReq.className = 'requirement valid';
+                lengthReq.textContent = '✓ At least 8 characters';
+            } else {
+                lengthReq.className = 'requirement invalid';
+                lengthReq.textContent = '✗ At least 8 characters';
+                isValid = false;
+            }
+
+            // Uppercase check
+            if (/[A-Z]/.test(password)) {
+                uppercaseReq.className = 'requirement valid';
+                uppercaseReq.textContent = '✓ One uppercase letter';
+            } else {
+                uppercaseReq.className = 'requirement invalid';
+                uppercaseReq.textContent = '✗ One uppercase letter';
+                isValid = false;
+            }
+
+            // Lowercase check
+            if (/[a-z]/.test(password)) {
+                lowercaseReq.className = 'requirement valid';
+                lowercaseReq.textContent = '✓ One lowercase letter';
+            } else {
+                lowercaseReq.className = 'requirement invalid';
+                lowercaseReq.textContent = '✗ One lowercase letter';
+                isValid = false;
+            }
+
+            // Digit check
+            if (/\d/.test(password)) {
+                digitReq.className = 'requirement valid';
+                digitReq.textContent = '✓ One number';
+            } else {
+                digitReq.className = 'requirement invalid';
+                digitReq.textContent = '✗ One number';
+                isValid = false;
+            }
+
+            // Special character check
+            if (/[@$!%*?&]/.test(password)) {
+                specialReq.className = 'requirement valid';
+                specialReq.textContent = '✓ One special character (@$!%*?&)';
+            } else {
+                specialReq.className = 'requirement invalid';
+                specialReq.textContent = '✗ One special character (@$!%*?&)';
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function validatePasswordMatch() {
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (confirmPassword && password !== confirmPassword) {
+                passwordMatchError.textContent = 'Passwords do not match';
+                return false;
+            } else {
+                passwordMatchError.textContent = '';
+                return true;
+            }
+        }
+
+        function updateSubmitButton() {
+            const passwordValid = validatePassword();
+            const passwordsMatch = validatePasswordMatch();
+
+            submitBtn.disabled = !(passwordValid && passwordsMatch && passwordInput.value && confirmPasswordInput.value);
+        }
+
+        passwordInput.addEventListener('input', updateSubmitButton);
+        confirmPasswordInput.addEventListener('input', updateSubmitButton);
+
+        // Initial validation
+        updateSubmitButton();
+
+        // Prevent form submission if validation fails
+        document.getElementById('registrationForm').addEventListener('submit', function(e) {
+            if (!validatePassword() || !validatePasswordMatch()) {
+                e.preventDefault();
+                alert('Please fix all validation errors before submitting.');
+            }
+        });
+    });
+</script>
+</body>
+</html>

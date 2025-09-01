@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Unlock Accounts - Admin</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .unlock-btn {
+            background-color: #28a745;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+<h2>Locked Accounts</h2>
+
+<table>
+    <thead>
+    <tr>
+        <th>Email</th>
+        <th>Name</th>
+        <th>Login Attempts</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="customer : ${lockedCustomers}">
+        <td th:text="${customer.email}"></td>
+        <td th:text="${customer.name}"></td>
+        <td th:text="${customer.loginAttempts}"></td>
+        <td>
+            <button class="unlock-btn"
+                    th:onclick="'unlockAccount(\'' + ${customer.email} + '\')'">
+                Unlock
+            </button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script>
+    function unlockAccount(email) {
+        fetch('/admin/unlock-account', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: 'email=' + encodeURIComponent(email)
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                if (data.status === 'success') {
+                    location.reload();
+                }
+            });
+    }
+</script>
+</body>
+</html>

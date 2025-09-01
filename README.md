@@ -19,7 +19,31 @@ git clone https://github.com/eslamomar/BookShop.git
 cd BookShop
 
 ---
+**application.properties** provide password for easy check the app but for the security soluation
+we should use environment variables
 
+✅ Environment variables to use in production
+
+DB_URL
+
+DB_USER
+
+DB_PASSWORD
+
+ADMIN_EMAIL
+
+ADMIN_PASSWORD
+
+ADMIN_NAME
+
+INIT_DATA
+
+KEYSTORE_PASSWORD
+
+KEYSTORE_ALIAS
+
+KEYSTORE_ALIAS
+---
 ## 🛠️ Set Up the Database (MySQL)
 
 1. Open your MySQL shell:

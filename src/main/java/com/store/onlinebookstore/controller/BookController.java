@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Controller
+// REMOVED: @RequestMapping("/books") - this was causing the conflict
 public class BookController {
 
     @Autowired
@@ -21,21 +22,6 @@ public class BookController {
 
     @Autowired
     private AuthorRepository authorRepository;
-
-
-    @GetMapping("/")
-    public String viewBooks(Model model) {
-        List<Book> books = bookRepository.findAll();
-        model.addAttribute("books", books);
-        return "index";  // customer view
-    }
-
-    @GetMapping("/admin/books")
-    public String showAdminPanel(Model model) {
-        List<Book> books = bookRepository.findAll();
-        model.addAttribute("books", books);
-        return "admin-panel"; // admin panel view
-    }
 
     @GetMapping("/books/add")
     public String showAddForm(Model model) {
@@ -48,7 +34,7 @@ public class BookController {
     public String showEditForm(@PathVariable Long id, Model model) {
         Optional<Book> bookOpt = bookRepository.findById(id);
         if (bookOpt.isEmpty()) {
-            return "redirect:/admin/books";
+            return "redirect:/admin-panel";
         }
         Book book = bookOpt.get();
         model.addAttribute("book", book);
@@ -64,8 +50,6 @@ public class BookController {
         return "book-form";
     }
 
-
-    // Save new or updated book
     @PostMapping("/books/save")
     public String saveBook(@ModelAttribute Book book,
                            @RequestParam("authorsInput") String authorsInput,
@@ -90,16 +74,14 @@ public class BookController {
 
         book.setAuthors(authors);
         bookRepository.save(book);
-        return "redirect:/admin/books";
+        return "redirect:/admin-panel";
     }
 
-
-    // Delete book
     @GetMapping("/books/delete/{id}")
     public String deleteBook(@PathVariable Long id) {
         if (bookRepository.existsById(id)) {
             bookRepository.deleteById(id);
         }
-        return "redirect:/admin/books";
+        return "redirect:/admin-panel";
     }
 }

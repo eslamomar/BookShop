@@ -6,13 +6,15 @@ import com.store.onlinebookstore.model.Customer;
 import com.store.onlinebookstore.repository.BookRepository;
 import com.store.onlinebookstore.repository.CartItemRepository;
 import com.store.onlinebookstore.repository.CustomerRepository;
-import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Controller
 @RequestMapping("/cart")
@@ -27,14 +29,21 @@ public class CartController {
     @Autowired
     private BookRepository bookRepo;
 
-    private Customer getCurrentCustomer(HttpSession session) {
-        return (Customer) session.getAttribute("customer");
+    private Customer getCurrentCustomer() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+        String email = authentication.getName();
+        return customerRepo.findByEmail(email).orElse(null);
     }
 
     @GetMapping
-    public String viewCart(HttpSession session, Model model) {
-        Customer customer = getCurrentCustomer(session);
-        if (customer == null) return "redirect:/login";
+    public String viewCart(Model model) {
+        Customer customer = getCurrentCustomer();
+        if (customer == null) {
+            return "redirect:/login";
+        }
 
         List<CartItem> items = cartItemRepo.findByCustomer(customer);
 
@@ -50,13 +59,18 @@ public class CartController {
     }
 
     @PostMapping("/add/{bookId}")
-    public String addToCart(@PathVariable Long bookId, HttpSession session) {
-        Customer customer = getCurrentCustomer(session);
-        if (customer == null) return "redirect:/login";
+    public String addToCart(@PathVariable Long bookId) {
+        Customer customer = getCurrentCustomer();
+        if (customer == null) {
+            return "redirect:/login";
+        }
 
-        Book book = bookRepo.findById(bookId).orElse(null);
-        if (book == null) return "redirect:/?error=BookNotFound";
+        Optional<Book> bookOpt = bookRepo.findById(bookId);
+        if (!bookOpt.isPresent()) {
+            return "redirect:/?error=BookNotFound";
+        }
 
+        Book book = bookOpt.get();
         CartItem item = cartItemRepo.findByCustomerAndBook(customer, book)
                 .orElse(new CartItem());
 
@@ -73,20 +87,33 @@ public class CartController {
     }
 
     @GetMapping("/remove/{itemId}")
-    public String removeFromCart(@PathVariable Long itemId, HttpSession session) {
-        Customer customer = getCurrentCustomer(session);
-        if (customer == null) return "redirect:/login";
+    public String removeFromCart(@PathVariable Long itemId) {
+        Customer customer = getCurrentCustomer();
+        if (customer == null) {
+            return "redirect:/login";
+        }
 
-        cartItemRepo.deleteById(itemId);
+        // Verify the item belongs to the current customer for security
+        Optional<CartItem> itemOpt = cartItemRepo.findById(itemId);
+        if (itemOpt.isPresent() && itemOpt.get().getCustomer().getId().equals(customer.getId())) {
+            cartItemRepo.deleteById(itemId);
+        }
         return "redirect:/cart";
     }
 
     @GetMapping("/checkout")
-    public String showCheckoutPage(HttpSession session, Model model) {
-        Customer customer = getCurrentCustomer(session);
-        if (customer == null) return "redirect:/login";
+    public String showCheckoutPage(Model model) {
+        Customer customer = getCurrentCustomer();
+        if (customer == null) {
+            return "redirect:/login";
+        }
 
         List<CartItem> items = cartItemRepo.findByCustomer(customer);
+
+        if (items.isEmpty()) {
+            model.addAttribute("error", "Your cart is empty");
+            return "cart";
+        }
 
         double total = items.stream()
                 .mapToDouble(item -> item.getBook().getPrice() * item.getQuantity())
@@ -94,23 +121,36 @@ public class CartController {
 
         model.addAttribute("cartItems", items);
         model.addAttribute("total", total);
-        return "checkout"; // This must match checkout.html
+        return "checkout";
     }
 
-
     @PostMapping("/checkout")
-    public String processCheckout(HttpSession session,
-                                  @RequestParam String cardNumber,
+    public String processCheckout(@RequestParam String cardNumber,
                                   @RequestParam String expiry,
                                   @RequestParam String cvv,
                                   Model model) {
 
-        Customer customer = getCurrentCustomer(session);
-        if (customer == null) return "redirect:/login";
+        Customer customer = getCurrentCustomer();
+        if (customer == null) {
+            return "redirect:/login";
+        }
+
+        // Basic input validation
+        if (cardNumber == null || cardNumber.trim().isEmpty() ||
+                expiry == null || expiry.trim().isEmpty() ||
+                cvv == null || cvv.trim().isEmpty()) {
+            model.addAttribute("error", "Please fill in all payment details");
+            return "checkout";
+        }
 
         List<CartItem> items = cartItemRepo.findByCustomer(customer);
 
-        // Reduce book copies
+        if (items.isEmpty()) {
+            model.addAttribute("error", "Your cart is empty");
+            return "redirect:/cart";
+        }
+
+        // Check stock availability and reduce inventory
         for (CartItem item : items) {
             Book book = item.getBook();
             int currentStock = book.getCopiesAvailable();
@@ -118,6 +158,10 @@ public class CartController {
 
             if (currentStock < quantity) {
                 model.addAttribute("error", "Not enough stock for " + book.getTitle());
+                model.addAttribute("cartItems", items);
+                model.addAttribute("total", items.stream()
+                        .mapToDouble(cartItem -> cartItem.getBook().getPrice() * cartItem.getQuantity())
+                        .sum());
                 return "checkout";
             }
 
@@ -125,11 +169,10 @@ public class CartController {
             bookRepo.save(book);
         }
 
-        cartItemRepo.deleteAll(items); // clear cart after checkout
+        // Clear cart after successful checkout
+        cartItemRepo.deleteAll(items);
+
         model.addAttribute("message", "Payment successful! Thank you for your purchase.");
         return "confirmation";
     }
-
-
 }
-

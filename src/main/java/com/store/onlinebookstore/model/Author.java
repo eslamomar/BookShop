@@ -1,18 +1,12 @@
 package com.store.onlinebookstore.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.ManyToMany;
-import org.springframework.data.annotation.Id;
-
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 public class Author {
 
-    @jakarta.persistence.Id
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,8 +16,14 @@ public class Author {
     @ManyToMany(mappedBy = "authors")
     private List<Book> books = new ArrayList<>();
 
-    // getters and setters
+    // Constructors
+    public Author() {}
 
+    public Author(String name) {
+        this.name = name;
+    }
+
+    // Getters and Setters
     public Long getId() {
         return id;
     }
@@ -47,5 +47,4 @@ public class Author {
     public void setBooks(List<Book> books) {
         this.books = books;
     }
-
 }
